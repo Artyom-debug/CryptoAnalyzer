@@ -78,3 +78,24 @@ public class AnalyticsReportDtoValidation : AbstractValidator<AnalyticsReportDto
         return true;
     }
 }
+
+public class IndicatorDtoValidator : AbstractValidator<IndicatorDto>
+{
+    public IndicatorDtoValidator()
+    {
+        RuleFor(x => x.Name)
+            .NotEmpty().WithMessage("Indicator name is required")
+            .Must(n => !string.IsNullOrWhiteSpace(n)).WithMessage("Indicator name cannot be whitespace.");
+
+        RuleFor(x => x.Importance)
+            .InclusiveBetween(0.0, 1.0)
+            .WithMessage("Importance must be between 0 and 1.");
+
+        When(x => x.Value.HasValue, () =>
+        {
+            RuleFor(x => x.Value!.Value)
+                .InclusiveBetween(-1_000_000_000m, 1_000_000_000m)
+                .WithMessage("Value is out of allowed range.");
+        });
+    }
+}
