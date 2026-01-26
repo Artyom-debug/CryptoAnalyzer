@@ -5,7 +5,7 @@ using Domain.Exceptions;
 
 namespace Domain.Entities;
 
-public class AnalyticsReport : BaseAuditableEntity
+public class AnalyticsReport : BaseEntity
 {
     public string Coin { get; set; }
     public decimal CurrentPrice { get; set; }
