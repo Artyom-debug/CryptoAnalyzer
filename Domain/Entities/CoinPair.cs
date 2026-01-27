@@ -1,12 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Domain.Common;
 
-namespace Domain.Entities
+namespace Domain.Entities;
+
+public class CoinPair : BaseEntity
 {
-    internal class CoinPair
+    private CoinPair() {}
+
+    public string? Symbol { get; private set; }
+
+    public CoinPair(string symbol)
     {
+        if (symbol is null )
+            throw new ArgumentNullException(nameof(symbol));
+        Symbol = symbol.Trim().ToUpper();
     }
 }
