@@ -1,5 +1,4 @@
 ﻿using Domain.Common;
-using Domain.Exceptions;
 
 namespace Domain.ValueObjects;
 
@@ -9,7 +8,7 @@ public class Indicator : ValueObject
     public decimal? Value { get; private set; }
     public double Importance { get; private set; }
     
-    public Indicator(string name, decimal value, double importance)
+    public Indicator(string name, decimal? value, double importance)
     {
         Name = name ?? throw new ArgumentNullException(nameof(name));
         Value = value;
