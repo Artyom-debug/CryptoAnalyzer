@@ -1,16 +1,15 @@
-﻿using Application.Common.Models;
-using Domain.ValueObjects;
+﻿using Domain.ValueObjects;
 
 namespace Application.AnaliticsReports.Commands.CreateAnaliticsReport;
 
-public class CreateAnaliticsReportCommandValidation : AbstractValidator<CreateAnaliticsReportCommand>
+public class CreateAnalyticsReportCommandValidation : AbstractValidator<CreateAnalyticsReportCommand>
 {
-    public CreateAnaliticsReportCommandValidation()
+    public CreateAnalyticsReportCommandValidation()
     {
-        RuleFor(v => v.report.Coin)
-                .NotEmpty().WithMessage("Coin name is required.")
-                .MaximumLength(20).WithMessage("The coin name must not exceed 10 characters..");
-        RuleFor(v => v.report.CurrentPrice)
+        RuleFor(v => v.Report.Symbol)
+                .NotEmpty().WithMessage("Coin pair name is required.")
+                .MaximumLength(20).WithMessage("The coin pair name must not exceed 10 characters..");
+        RuleFor(v => v.Report.Probabilities.ProbabilityDown)
             .GreaterThan(0).WithMessage("The price must be greater than zero.");
         RuleFor(v => v.report.ChangePercent)
             .InclusiveBetween(-100, 100).WithMessage("The percentage change must be between -100 and 100.");
