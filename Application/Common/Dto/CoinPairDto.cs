@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Application.Common.Dto;
 
-namespace Application.Common.Dto
+public class CoinPairDto
 {
-    internal class CoinPairDto
-    {
-    }
+    public string? CoinPair { get; set; }
+    public Guid CoinPairId { get; set; }
 }

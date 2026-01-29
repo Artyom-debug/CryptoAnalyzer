@@ -11,9 +11,9 @@ public class AnalyticsReport : BaseEntity
     public CoinPair CoinPair { get; private set; } //navigation for ef
     public Probability Probability { get; private set; }
     public Timeframe Timeframe { get; private set; }
-    public DateTimeOffset? CreatedAt { get; private set; }
-    public DateTimeOffset? CandleOpen { get; private set; }
-    public DateTimeOffset? CandleClose { get; private set; }
+    public DateTimeOffset CreatedAt { get; private set; }
+    public DateTimeOffset CandleOpen { get; private set; }
+    public DateTimeOffset CandleClose { get; private set; }
     public IReadOnlyList<Indicator> Indicators => _indicators.AsReadOnly();
 
     public AnalyticsReport(Guid coinPairId,
