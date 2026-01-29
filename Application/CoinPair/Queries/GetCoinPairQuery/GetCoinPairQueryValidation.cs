@@ -4,9 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.CoinPair.Queries.GetCoinPairQuery
+namespace Application.CoinPair.Queries.GetCoinPairQuery;
+
+public class GetCoinPairQueryValidation : AbstractValidator<GetCoinPairQuery>
 {
-    internal class GetCoinPairQueryValidation
+    public GetCoinPairQueryValidation()
     {
+        RuleFor(x => x.Symbol)
+            .NotEmpty().WithMessage("Coin pair name is required.");
     }
 }

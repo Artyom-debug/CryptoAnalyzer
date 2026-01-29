@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.CoinPair.Queries.GetAllCoinPairQuery
+namespace Infrastructure.Services
 {
-    internal class GetAllCoinQueryValidation
+    internal class BackgroundCreatingReportService
     {
     }
 }

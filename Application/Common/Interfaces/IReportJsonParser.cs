@@ -1,8 +1,8 @@
-﻿using Application.Common.Models;
+﻿using Application.Common.Dto;
 
 namespace Application.Common.Interfaces;
 
 public interface IReportJsonParser
 {
-    public ReportDto ParseJson(string json);
+    public AnalyticsReportDto ParseJson(string json);
 }

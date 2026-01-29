@@ -5,6 +5,6 @@ namespace Application.Common.Interfaces;
 public interface IApplicationDbContext
 {
     DbSet<AnalyticsReport> AnalyticsReports { get; }
-    DbSet<CoinPair> CoinPairs { get; }
+    DbSet<Domain.Entities.CoinPair> CoinPairs { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }
