@@ -8,40 +8,74 @@ public class AnalyticsReportConfiguration : IEntityTypeConfiguration<AnalyticsRe
 {
     public void Configure(EntityTypeBuilder<AnalyticsReport> builder)
     {
-        builder.HasKey(t => t.Id);
+        builder.HasKey(x => x.Id);
 
-        builder.Property(t => t.Coin)
-            .IsRequired()
-            .HasMaxLength(20);
+        builder.Property(x => x.CoinPairId).IsRequired();
 
-        builder.Property(t => t.CurrentPrice)
-            .IsRequired()
-            .HasColumnType("decimal(18, 8)");
+        builder.HasOne(x => x.CoinPair)
+            .WithMany()
+            .HasForeignKey(x => x.CoinPairId)
+            .OnDelete(DeleteBehavior.Restrict);
 
-        builder.Property(t => t.ChangePercent)
+        builder.Property(x => x.CreatedAt)
             .IsRequired();
 
-        builder.OwnsOne(t => t.Summary, summaryBuilder => //поля типа Recommendation встраиваются в таблицу AnalyticsReport, т.к. связь один-к-одному (каждому AnalyticsReport один Recommendation)
-        {
-            summaryBuilder.Property(t => t.Action)
-                .IsRequired()
-                .HasMaxLength(20);
+        builder.Property(x => x.CandleOpen)
+            .IsRequired();
 
-            summaryBuilder.Property(t => t.Confidence)
+        builder.Property(x => x.CandleClose)
+            .IsRequired();
+
+        builder.OwnsOne(x => x.Probability, pr =>
+        {
+            pr.Property(p => p.ProbabilityUp)
+                .HasPrecision(9, 6)
                 .IsRequired();
 
-            summaryBuilder.Property(t => t.Risk)
-                .IsRequired()
-                .HasMaxLength(10);
+            pr.Property(p => p.ProbabilityDown)
+                .HasPrecision(9, 6)
+                .IsRequired();
 
-            summaryBuilder.Property(t => t.Summary)
-                .IsRequired()
-                .HasMaxLength(1000);
+            pr.Property(p => p.ProbabilityFlat)
+                .HasPrecision(9, 6)
+                .IsRequired();
         });
 
-        builder.OwnsMany(t => t.Indicators, indicatorBuilder => //сохраняем indicator как json
+        builder.OwnsOne(x => x.Timeframe, tm =>
         {
-            indicatorBuilder.ToJson();
+            tm.Property(p => p.Value)
+                .HasColumnName("Timeframe")
+                .HasMaxLength(10)
+                .IsRequired();
         });
+
+        builder.OwnsMany(x => x.Indicators, ind =>
+        {
+            ind.ToTable("AnalyticsReportIndicators");
+
+            ind.WithOwner().HasForeignKey("ReportId");
+
+            ind.Property(i => i.Value)
+                .IsRequired(false)
+                .HasPrecision(18, 8);
+
+            ind.Property(i => i.Importance)
+                .HasPrecision(9, 6)
+                .IsRequired();
+
+            ind.Property(i => i.Name)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            ind.HasKey("ReportId", "Name");
+
+            ind.HasIndex("ReportId");
+        });
+
+        builder.HasIndex(x => x.CoinPairId )
+            .HasDatabaseName("AnalyticsReports_CoinPairId");
+
+        builder.HasIndex("CoinPairId", "Timeframe", "CreatedAt")
+            .HasDatabaseName("AnalyticsReports_CoinPair_Timeframe_CreatedAt");
     }
 }

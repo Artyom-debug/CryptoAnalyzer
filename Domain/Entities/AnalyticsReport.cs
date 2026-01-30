@@ -34,7 +34,7 @@ public class AnalyticsReport : BaseEntity
         CandleClose = candleClose;
         if(indicators is null)
             throw new ArgumentNullException(nameof(indicators));
-        _indicators = indicators;
+        _indicators.AddRange(indicators);
     }
 
     public Indicator? GetIndicator(string name)
