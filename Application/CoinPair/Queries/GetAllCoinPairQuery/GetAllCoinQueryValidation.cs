@@ -4,9 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.CoinPair.Queries.GetAllCoinPairQuery
+namespace Application.CoinPair.Queries.GetAllCoinPairQuery;
+
+public class GetAllCoinQueryValidation
 {
-    internal class GetAllCoinQueryValidation
-    {
-    }
 }

@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Application.AnaliticsReports.Queries.GetAnalyticsReportWithPagination;
 
-namespace Application.AnaliticsReports.Queries.GetAnalyticsReportWithPagination
+public class GetAnalyticsReportWithPaginationQueryValidation
 {
-    internal class GetAnalyticsReportWithPaginationQueryValidation
-    {
-    }
+
 }
