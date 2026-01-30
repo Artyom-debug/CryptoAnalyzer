@@ -18,7 +18,7 @@ public class GetCoinPairQueryHandler : IRequestHandler<GetCoinPairQuery, CoinPai
     {
         var entity = await _context.CoinPairs.Where(c => c.Symbol == request.Symbol)
                                        .Select(c => new CoinPairDto {CoinPair = request.Symbol, CoinPairId = c.Id})
-                                       .FirstOrDefault(cancellationToken);
+                                       .FirstOrDefaultAsync(cancellationToken);
         Guard.Against.Null(entity);
         return entity;
     }
