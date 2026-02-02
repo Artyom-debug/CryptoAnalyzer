@@ -53,7 +53,7 @@ public class IdentityService : IIdentityService
         return result.Succeeded;
     }
 
-    public async Task<Result> DeleteUserAsync(string userId) //перегружаем метод, чтобы удалить пользователя по Id
+    public async Task<Result> DeleteUserAsync(string userId) 
     {
         var user = await _userManager.FindByIdAsync(userId);
         return user != null ? await DeleteUserAsync(user) : Result.Success();

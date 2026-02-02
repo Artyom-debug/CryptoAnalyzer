@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
+using Polly;
 
 namespace Infrastructure;
 
@@ -16,12 +17,21 @@ public static class DependencyInjection
 {
     public static void AddInfrastructureServices(this IHostApplicationBuilder builder)
     {
+        builder.Services.AddHttpClient<IReportApiClient, ReportApiClient>((HttpClient client) =>
+        {
+            client.BaseAddress = new Uri("");
+            client.Timeout = TimeSpan.FromSeconds(10);
+        }).AddTransientHttpErrorPolicy(policy =>
+            policy.WaitAndRetryAsync(new[]
+            {
+                TimeSpan.FromMilliseconds(200),
+                TimeSpan.FromMilliseconds(500),
+                TimeSpan.FromSeconds(1)
+            })
+        );
+
         var connectionString = builder.Configuration.GetConnectionString("ConnectionString");
         Guard.Against.Null(connectionString, message: "Connection string 'ConnectionString' not found.");
-
-        builder.Services.Configure<ReportApiSettings>( //получаем базовый url из appsettings.json
-            builder.Configuration.GetSection("ReportApiSettings")
-        );
 
         builder.Services.AddDbContext<ApplicationDbContext>((sp, options) =>
         {
@@ -33,9 +43,6 @@ public static class DependencyInjection
         builder.Services.AddDefaultIdentity<ApplicationUser>()
             .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>();
-
-        builder.Services.AddHttpClient<IReportApiClient, ReportApiClient>();
-        builder.Services.AddSingleton<IReportJsonParser, ReportJsonParser>();
 
         builder.Services.AddAuthorization(options =>
             options.AddPolicy(Policies.CanViewReports, policy => policy.RequireRole(Roles.Administrator)));

@@ -1,6 +1,8 @@
-﻿namespace Application.Common.Interfaces;
+﻿using Application.Common.Dto;
+
+namespace Application.Common.Interfaces;
 
 public interface IReportApiClient
 {
-    public Task<string> GetReportJsonAsync(string coinSymbol, CancellationToken cancellationToken);
+    public Task<IReadOnlyList<AnalyticsReportDto>> GetReportJsonAsync(string timeframe, string[] coinPairs, CancellationToken cancellationToken);
 }
