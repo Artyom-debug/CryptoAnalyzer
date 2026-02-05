@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Polly;
+using Quartz;
 
 namespace Infrastructure;
 
@@ -17,6 +18,7 @@ public static class DependencyInjection
 {
     public static void AddInfrastructureServices(this IHostApplicationBuilder builder)
     {
+        //configuring http client to python service
         builder.Services.AddHttpClient<IReportApiClient, ReportApiClient>((HttpClient client) =>
         {
             client.BaseAddress = new Uri("");
@@ -30,6 +32,26 @@ public static class DependencyInjection
             })
         );
 
+        builder.Services.AddQuartz(q =>
+        {
+            var jobKey = new JobKey("BackgroundCreatingReportService");
+            q.AddJob<BackgroundCreatingReportService>(opts => opts.WithIdentity(jobKey));
+
+            q.AddTrigger(opts => opts
+                .ForJob(jobKey)
+                .WithIdentity("BackgroundCreatingReportService-timeframe-1h")
+                .UsingJobData("timeframe", "1h")
+                .StartNow()
+                .WithSimpleSchedule(x => x.WithIntervalInMinutes(10).RepeatForever()));
+
+            q.AddTrigger(opts => opts
+                .ForJob(jobKey)
+                .WithIdentity("GenerateReports_1hour")
+                .UsingJobData("timeframe", "1d")
+                .StartNow()
+                .WithSimpleSchedule(x => x.WithIntervalInHours(1).RepeatForever()));
+        });
+
         var connectionString = builder.Configuration.GetConnectionString("ConnectionString");
         Guard.Against.Null(connectionString, message: "Connection string 'ConnectionString' not found.");
 
@@ -38,7 +60,7 @@ public static class DependencyInjection
             options.UseNpgsql(connectionString); 
         });
 
-        builder.Services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>()); //регистрация сервиса бд (используем лямбда-выражение, чтобы получить всю конфигурацию бд)
+        builder.Services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
 
         builder.Services.AddDefaultIdentity<ApplicationUser>()
             .AddRoles<IdentityRole>()
