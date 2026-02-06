@@ -32,6 +32,7 @@ public static class DependencyInjection
             })
         );
 
+        //configuring background service with Quartz
         builder.Services.AddQuartz(q =>
         {
             var jobKey = new JobKey("BackgroundCreatingReportService");
@@ -52,6 +53,7 @@ public static class DependencyInjection
                 .WithSimpleSchedule(x => x.WithIntervalInHours(1).RepeatForever()));
         });
 
+        //configuring database
         var connectionString = builder.Configuration.GetConnectionString("ConnectionString");
         Guard.Against.Null(connectionString, message: "Connection string 'ConnectionString' not found.");
 
