@@ -63,12 +63,16 @@ public static class DependencyInjection
         });
 
         builder.Services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
+        builder.Services.AddScoped<ApplicationDbContextInitialiser>();
 
+        //configuring Identity
         builder.Services.AddDefaultIdentity<ApplicationUser>()
             .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>();
+        builder.Services.AddSingleton(TimeProvider.System);
+        builder.Services.AddTransient<IIdentityService, IdentityService>();
 
-        builder.Services.AddAuthorization(options =>
-            options.AddPolicy(Policies.CanViewReports, policy => policy.RequireRole(Roles.Administrator)));
+        //builder.Services.AddAuthorization(options =>
+        //    options.AddPolicy(Policies.CanViewReports, policy => policy.RequireRole(Roles.Administrator)));
     }
 }
