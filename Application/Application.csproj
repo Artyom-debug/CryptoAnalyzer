@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <Folder Include="CoinPair\Commands\" />
+    <Folder Include="Authentication\" />
   </ItemGroup>
 
 </Project>

@@ -30,27 +30,15 @@ public class IdentityService : IIdentityService
         return user != null && await _userManager.IsInRoleAsync(user, role);
     }
 
-    public async Task<(Result Result, string UserId)> CreateUserAsync(string userName, string password)
+    public async Task<(Result Result, string UserId)> CreateUserAsync(string userName, string password, string email)
     {
         var user = new ApplicationUser
         { 
             UserName = userName,
-            Email = userName
+            Email = email
         };
         var result = await _userManager.CreateAsync(user, password);
         return (result.ToApplicationResult(), user.Id);
-    }
-
-    public async Task<bool> AuthorizeAsync(string userId, string policyName)
-    {
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user == null) 
-        { 
-            return false; 
-        }
-        var principal = await _userClaimsPrincipalFactory.CreateAsync(user);
-        var result  = await _authorizationService.AuthorizeAsync(principal, policyName);
-        return result.Succeeded;
     }
 
     public async Task<Result> DeleteUserAsync(string userId) 
