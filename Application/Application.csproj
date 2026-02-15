@@ -19,8 +19,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Authentication\Commands\LogoutCommand\" />
     <Folder Include="CoinPair\Commands\" />
-    <Folder Include="Authentication\" />
   </ItemGroup>
 
 </Project>
