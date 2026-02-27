@@ -29,8 +29,6 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponse>
 
         var pair = await _tokenService.GenerateTokenPairAsync(userId, cancellationToken);
 
-        /*add saving refresh token to db*/
-
         return new AuthResponse
         { 
             Tokens = pair,

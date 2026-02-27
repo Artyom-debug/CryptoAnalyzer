@@ -12,4 +12,6 @@ public interface IIdentityService
     Task<Result> DeleteUserAsync(string userId);
 
     Task<(Result Result, string UserId)> VerifyUserPasswordAsync(string password, string email);
+
+    Task<>
 }

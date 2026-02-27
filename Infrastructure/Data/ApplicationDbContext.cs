@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using System.Reflection;
 using Infrastructure.Services.Identity;
+using Infrastructure.Auth;
 
 namespace Infrastructure.Data;
 
@@ -12,6 +13,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IApplica
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
     public DbSet<AnalyticsReport> AnalyticsReports => Set<AnalyticsReport>();
     public DbSet<CoinPair> CoinPairs => Set<CoinPair>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

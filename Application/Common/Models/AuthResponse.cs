@@ -10,5 +10,4 @@ public class AuthResponse
 {
     public TokenPair? Tokens { get; set; }
     public string? UserId { get; set; }
-    public DateTimeOffset 
 }
