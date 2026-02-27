@@ -17,15 +17,15 @@ public class TokenService : ITokenService
 {
     private readonly JwtOptions _jwtOptions;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
-    private readonly IIdentityService _identityService;
+    private readonly UserManager<ApplicationUser> _userManager
     private readonly IConfiguration _configuration;
 
-    public TokenService(JwtOptions jwtOptions, IRefreshTokenRepository refreshToken, IIdentityService identityService, IConfiguration configuration)
+    public TokenService(JwtOptions jwtOptions, IRefreshTokenRepository refreshToken, UserManager<ApplicationUser> manager, IConfiguration configuration)
     {
         _jwtOptions = jwtOptions;
         _refreshTokenRepository = refreshToken;
-        _identityService = identityService;
         _configuration = configuration;
+        _userManager = manager;
     }
 
     private async Task<(string token, DateTime expiresAt)> GenerateAccessTokenAsync(IdentityUser user)
@@ -60,16 +60,16 @@ public class TokenService : ITokenService
         var plain = Base64(bytes);
         var hash = Sha256Hex(plain);
 
-        var entity = new RefreshToken(userId, );
+        var entity = new RefreshToken(userId, hash, DateTime.UtcNow, tokenExpireTimeStamp);
         return (plain, entity);
     }
 
     public async Task<TokenPair> GenerateTokenPairAsync(string userId, CancellationToken cancellationToken)
     {
-        var user = await _identityService.GetUserById(userId) 
+        var user = await _userManager.FindByIdAsync(userId) 
             ?? throw new UnauthorizedAccessException("User not found");
         var access = await GenerateAccessTokenAsync(user);
-        var refresh = GenerateRefreshTokenAsync(user);
+        var refresh = GenerateRefreshTokenAsync(userId);
 
         await _refreshTokenRepository.StoreRefreshTokenAsync(refresh.entity, cancellationToken);
 

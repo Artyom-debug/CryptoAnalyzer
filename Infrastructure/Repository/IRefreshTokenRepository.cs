@@ -5,5 +5,5 @@ namespace Infrastructure.Repository;
 public interface IRefreshTokenRepository
 {
     public Task StoreRefreshTokenAsync(RefreshToken refreshToken, CancellationToken cancellation);
-
+    public Task<RefreshToken?> GetRefreshTokenByHashAsync(string hash);
 }
