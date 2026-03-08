@@ -11,6 +11,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Polly;
 using Quartz;
+using Microsoft.EntityFrameworkCore.Internal;
+using Infrastructure.Repository;
+using Infrastructure.Auth;
 
 namespace Infrastructure;
 
@@ -74,5 +77,9 @@ public static class DependencyInjection
 
         //builder.Services.AddAuthorization(options =>
         //    options.AddPolicy(Policies.CanViewReports, policy => policy.RequireRole(Roles.Administrator)));
+
+        //configuring auth services
+        builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        builder.Services.AddScoped<ITokenService, TokenService>();
     }
 }

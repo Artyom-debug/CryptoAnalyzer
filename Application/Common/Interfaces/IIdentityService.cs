@@ -13,5 +13,4 @@ public interface IIdentityService
 
     Task<(Result Result, string UserId)> VerifyUserPasswordAsync(string password, string email);
 
-    Task<>
 }
