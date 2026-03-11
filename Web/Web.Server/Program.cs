@@ -1,4 +1,14 @@
+using Application.Common.Interfaces;
 using Infrastructure;
+using Infrastructure.Auth;
+using Infrastructure.Services.Identity;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,15 +17,61 @@ builder.AddApplicationServices();
 builder.AddInfrastructureServices();
 
 //add jwt authentication and authorization
-builder.Services.AddAuthentication()
-    .AddJwtBearer();
+const string AccessCookieName = "access_token";
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        var jwt = builder.Configuration.GetSection("JwtConfig").Get<JwtOptions>()
+                  ?? throw new InvalidOperationException("JwtConfig section is missing.");
+
+        var keyBytes = Convert.FromBase64String(jwt.SecretKey);
+        var signingKey = new SymmetricSecurityKey(keyBytes);
+
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = jwt.Issuer,
+
+            ValidateAudience = true,
+            ValidAudience = jwt.Audience,
+
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = signingKey,
+
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero,
+
+            NameClaimType = JwtRegisteredClaimNames.Sub,
+            RoleClaimType = ClaimTypes.Role
+        };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                if (context.Request.Cookies.TryGetValue(AccessCookieName, out var token)
+                    && !string.IsNullOrWhiteSpace(token))
+                {
+                    context.Token = token;
+                }
+
+                return Task.CompletedTask;
+            }
+        };
+    });
 builder.Services.AddAuthorization();
+
 
 //configure api
 builder.Services.AddControllers();
 //builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+
+
+
 
 var app = builder.Build();
 

@@ -15,11 +15,9 @@ public record RefreshCommand(string RefreshToken) : IRequest<TokenPair>;
 public class RefreshCommandHandler : IRequestHandler<RefreshCommand, TokenPair>
 {
     private readonly ITokenService _tokenService;
-    private readonly IIdentityService _identityService;
 
-    public RefreshCommandHandler(IIdentityService identityService, ITokenService tokenService)
+    public RefreshCommandHandler(ITokenService tokenService)
     {
-        _identityService = identityService;
         _tokenService = tokenService;
     }
 

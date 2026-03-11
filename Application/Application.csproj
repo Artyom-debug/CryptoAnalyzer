@@ -19,7 +19,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Authentication\Commands\LogoutCommand\" />
     <Folder Include="CoinPair\Commands\" />
   </ItemGroup>
 

@@ -69,7 +69,17 @@ public static class DependencyInjection
         builder.Services.AddScoped<ApplicationDbContextInitialiser>();
 
         //configuring Identity
-        builder.Services.AddDefaultIdentity<ApplicationUser>()
+        builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
+        {
+            options.Password.RequiredLength = 8;
+            options.Password.RequireDigit = true;
+            options.Password.RequireLowercase = true;
+            options.Password.RequireUppercase = true;
+            options.Password.RequireNonAlphanumeric = true;
+            options.Password.RequiredUniqueChars = 4;
+
+            options.User.RequireUniqueEmail = true;
+        })
             .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>();
         builder.Services.AddSingleton(TimeProvider.System);
@@ -81,5 +91,9 @@ public static class DependencyInjection
         //configuring auth services
         builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         builder.Services.AddScoped<ITokenService, TokenService>();
+        var jwtOptions = builder.Configuration.GetSection("JwtConfig").Get<JwtOptions>()
+                ?? throw new InvalidOperationException("JwtConfig section is missing.");
+
+        builder.Services.AddSingleton(jwtOptions);
     }
 }

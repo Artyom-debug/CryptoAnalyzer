@@ -19,27 +19,19 @@ public class TokenService : ITokenService
     private readonly JwtOptions _jwtOptions;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly UserManager<ApplicationUser> _userManager;
-    private readonly IConfiguration _configuration;
 
-    public TokenService(JwtOptions jwtOptions, IRefreshTokenRepository refreshToken, UserManager<ApplicationUser> manager, IConfiguration configuration)
+    public TokenService(JwtOptions jwtOptions, IRefreshTokenRepository refreshToken, UserManager<ApplicationUser> manager)
     {
         _jwtOptions = jwtOptions;
         _refreshTokenRepository = refreshToken;
-        _configuration = configuration;
         _userManager = manager;
     }
 
     private async Task<(string token, DateTime expiresAt)> GenerateAccessTokenAsync(ApplicationUser user)
     {
-        var issuer = _configuration["JwtConfig:Issuer"];
-        var audience = _configuration["JwtConfig:Audience"];
-        var key = Encoding.UTF8.GetBytes(_configuration["JwtConfig:Key"]!);
-        var tokenValidity = _configuration.GetValue<int>("JwtConfig:TokenValidityMins");
-        var tokenExpireTimeStamp = DateTime.UtcNow.AddMinutes(tokenValidity);
+        var key = Encoding.UTF8.GetBytes(_jwtOptions.SecretKey);
+        var tokenExpireTimeStamp = DateTime.UtcNow.AddMinutes(_jwtOptions.TokenValidityMins);
         var signing = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
-
-        //var roles = await _identityService.GetUserRolesAsync(user);
-
         var stamp = await _userManager.GetSecurityStampAsync(user);
 
         var claims = new List<Claim>
@@ -49,16 +41,19 @@ public class TokenService : ITokenService
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new("ss", stamp)
         };
-        //claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r));
+        var roles = await _userManager.GetRolesAsync(user);
+        claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));
 
-        var token = new JwtSecurityToken(issuer, audience, claims, DateTime.UtcNow, tokenExpireTimeStamp, signing);
-        var tokenValue = new JwtSecurityTokenHandler().WriteToken(token);
-        return (tokenValue, tokenExpireTimeStamp);
+        var token = new JwtSecurityToken(
+            _jwtOptions.Issuer, _jwtOptions.Audience,
+            claims, DateTime.UtcNow, tokenExpireTimeStamp, signing);
+
+        return (new JwtSecurityTokenHandler().WriteToken(token), tokenExpireTimeStamp);
     }
 
     private (string token, RefreshToken entity) GenerateRefreshToken(string userId)
     {
-        var refreshTokenValidity = _configuration.GetValue<int>("JwtConfig:RefreshTokenValidityDays");
+        var refreshTokenValidity = _jwtOptions.RefreshTokenValidityDays;
         var tokenExpireTimeStamp = DateTime.UtcNow.AddDays(refreshTokenValidity);
         var bytes = RandomNumberGenerator.GetBytes(64);
         var plain = Base64Url(bytes);
@@ -103,8 +98,8 @@ public class TokenService : ITokenService
             throw new UnauthorizedAccessException("Refresh token expired.");
 
         var userId = refresh.UserId;
-        var tokenPair = await GenerateTokenPairAsync(userId, ct);
         await _refreshTokenRepository.RevokeTokenAsync(refresh, ct);
+        var tokenPair = await GenerateTokenPairAsync(userId, ct);
         return tokenPair;
     }
 
