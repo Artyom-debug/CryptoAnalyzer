@@ -52,4 +52,16 @@ public class IdentityService : IIdentityService
         var result = await _userManager.DeleteAsync(user);
         return result.ToApplicationResult();
     }
+
+    public async Task<(Result Result, string UserId)> VerifyUserPasswordAsync(string password, string email)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if(user is null)
+        {
+            return (Result.Failure(new[] {"User with such email don't exist."}), string.Empty);
+        }
+
+        bool isPasswordValid = await _userManager.CheckPasswordAsync(user, password);
+        return isPasswordValid ? (Result.Success(), user.Id) : (Result.Failure(new[] {"Entered password is invalid."}), user.Id);
+    }
 }

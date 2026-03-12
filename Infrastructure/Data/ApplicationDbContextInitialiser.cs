@@ -65,13 +65,14 @@ public class ApplicationDbContextInitialiser
 
     public async Task TrySeedAsync()
     {
+        //seed admin
         var admin = new IdentityRole(Roles.Administrator);
         if(_roleManager.Roles.All(r => r.Name != admin.Name))
         {
             await _roleManager.CreateAsync(admin);
         }
 
-        var administrator = new ApplicationUser { UserName = "", Email = "" };
+        var administrator = new ApplicationUser { UserName = "Gigachad", Email = "artemmavcun57@gmail.com" };
         if(_userManager.Users.All(u => u.UserName != administrator.UserName))
         {
             await _userManager.CreateAsync(administrator, "");
@@ -81,6 +82,7 @@ public class ApplicationDbContextInitialiser
             }
         }
 
+        //seed coin pairs
         if(!_context.CoinPairs.Any())
         {
             _context.CoinPairs.AddRange(
