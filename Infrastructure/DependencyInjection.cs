@@ -14,6 +14,7 @@ using Quartz;
 using Microsoft.EntityFrameworkCore.Internal;
 using Infrastructure.Repository;
 using Infrastructure.Auth;
+using Infrastructure.Email;
 
 namespace Infrastructure;
 
@@ -84,6 +85,11 @@ public static class DependencyInjection
             .AddEntityFrameworkStores<ApplicationDbContext>();
         builder.Services.AddSingleton(TimeProvider.System);
         builder.Services.AddTransient<IIdentityService, IdentityService>();
+
+        //configuring smtp email sender
+        var smtpOptions = builder.Configuration.GetSection(SmtpOptions.SectionName).Get<SmtpOptions>() ?? new SmtpOptions();
+        builder.Services.AddSingleton(smtpOptions);
+        builder.Services.AddTransient<IEmailSender, SmtpEmailSender>();
 
         //builder.Services.AddAuthorization(options =>
         //    options.AddPolicy(Policies.CanViewReports, policy => policy.RequireRole(Roles.Administrator)));
