@@ -2,11 +2,14 @@
 using Application.Authentication.Commands.LogoutCommand;
 using Application.Authentication.Commands.RefreshCommand;
 using Application.Authentication.Commands.RegisterCommand;
+using Application.Common.Interfaces;
 using Application.Common.Models;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration.UserSecrets;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Principal;
 using Web.Server.Constants;
 
 namespace Web.Server.Api.Controllers;
@@ -16,10 +19,11 @@ namespace Web.Server.Api.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IMediator _mediator;
-
-    public AuthController(IMediator mediator)
+    private readonly IIdentityService _identityService;
+    public AuthController(IMediator mediator, IIdentityService identityService)
     {
         _mediator = mediator;
+        _identityService = identityService;
     }
 
     [HttpPost("register")]
@@ -70,6 +74,17 @@ public class AuthController : ControllerBase
         await _mediator.Send(new LogoutCommand(userId), token);
         DeleteAuthCookie();
         return NoContent();
+    }
+
+    [HttpPost("confirmEmail")]
+    public async Task<IActionResult> EmailConfirm([FromQuery] string userId, [FromQuery] string token)
+    {
+        var response = await _identityService.ConfirmEmailAsync(userId, token);
+        if(!response.Succeeded)
+        {
+            return BadRequest("Invalid emailConfirmation token.");
+        }
+        return Ok("Email successfully confirmed.");
     }
 
     private void SetAuthCookie(TokenPair tokens)

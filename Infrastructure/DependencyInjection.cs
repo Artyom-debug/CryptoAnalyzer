@@ -79,6 +79,7 @@ public static class DependencyInjection
             options.Password.RequiredUniqueChars = 4;
 
             options.User.RequireUniqueEmail = true;
+            options.SignIn.RequireConfirmedEmail = true;
         })
             .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>();
@@ -93,7 +94,10 @@ public static class DependencyInjection
         builder.Services.AddScoped<ITokenService, TokenService>();
         var jwtOptions = builder.Configuration.GetSection("JwtConfig").Get<JwtOptions>()
                 ?? throw new InvalidOperationException("JwtConfig section is missing.");
-
         builder.Services.AddSingleton(jwtOptions);
+
+        //configuring email sender
+        builder.Services.AddTransient<IEmailSender, EmailSender>();
+        builder.Services.Configure<AuthMessageSenderOptions>(builder.Configuration.GetSection("AuthMessageSenderOptions"));
     }
 }

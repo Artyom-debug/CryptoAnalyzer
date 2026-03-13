@@ -72,7 +72,7 @@ public class ApplicationDbContextInitialiser
             await _roleManager.CreateAsync(admin);
         }
 
-        var administrator = new ApplicationUser { UserName = "Gigachad", Email = "artemmavcun57@gmail.com" };
+        var administrator = new ApplicationUser { UserName = "Gigachad", Email = "artemmavcun57@gmail.com", EmailConfirmed = true };
         if(_userManager.Users.All(u => u.UserName != administrator.UserName))
         {
             await _userManager.CreateAsync(administrator, "");
@@ -86,9 +86,9 @@ public class ApplicationDbContextInitialiser
         if(!_context.CoinPairs.Any())
         {
             _context.CoinPairs.AddRange(
-                    new CoinPair("BTC/USDT"),
-                    new CoinPair("ETH/USDT"),
-                    new CoinPair("SOL/USDT")
+                    new CoinPair("BTC-USDT"),
+                    new CoinPair("ETH-USDT"),
+                    new CoinPair("SOL-USDT")
             );
             await _context.SaveChangesAsync();
         }
