@@ -1,0 +1,55 @@
+# Git
+.git
+.gitignore
+
+# IDE / Editor
+.vs
+.vscode
+.idea
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# .NET build artifacts
+**/bin
+**/obj
+**/out
+**/TestResults
+
+# Logs
+**/*.log
+logs
+LogFiles
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Node / frontend artifacts
+**/node_modules
+**/dist
+**/build
+npm-debug.log
+yarn-error.log
+pnpm-debug.log
+
+# Env / secrets
+**/.env
+**/.env.*
+**/secrets.json
+
+# Coverage / reports
+**/coverage
+**/coverage.*
+**/*.trx
+
+# Local databases / temp
+**/*.db
+**/*.sqlite
+**/*.sqlite3
+**/tmp
+**/temp
+
+# NuGet local cache artifacts
+.nuget
