@@ -65,6 +65,16 @@ public class ApplicationDbContextInitialiser
 
     public async Task TrySeedAsync()
     {
+        //seed roles
+        var roles = new[] { Roles.Administrator, Roles.User, Roles.Manager };
+        foreach (var roleName in roles)
+        {
+            if (_roleManager.Roles.All(r => r.Name != roleName))
+            {
+                await _roleManager.CreateAsync(new IdentityRole(roleName));
+            }
+        }
+
         //seed admin
         var admin = new IdentityRole(Roles.Administrator);
         if(_roleManager.Roles.All(r => r.Name != admin.Name))
@@ -73,9 +83,9 @@ public class ApplicationDbContextInitialiser
         }
 
         var administrator = new ApplicationUser { UserName = "Gigachad", Email = "artemmavcun57@gmail.com", EmailConfirmed = true };
-        if(_userManager.Users.All(u => u.UserName != administrator.UserName))
+        if(_userManager.Users.All(u => u.Email != administrator.Email))
         {
-            await _userManager.CreateAsync(administrator, "");
+            await _userManager.CreateAsync(administrator, "Mav_230206");
             if (!string.IsNullOrWhiteSpace(admin.Name)) 
             { 
                 await _userManager.AddToRolesAsync(administrator, new[] { admin.Name }); 
@@ -86,9 +96,9 @@ public class ApplicationDbContextInitialiser
         if(!_context.CoinPairs.Any())
         {
             _context.CoinPairs.AddRange(
-                    new CoinPair("BTC-USDT"),
-                    new CoinPair("ETH-USDT"),
-                    new CoinPair("SOL-USDT")
+                    new CoinPair("BTC-USDT")
+                    //new CoinPair("ETH-USDT"),
+                    //new CoinPair("SOL-USDT")
             );
             await _context.SaveChangesAsync();
         }

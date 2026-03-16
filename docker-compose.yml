@@ -1,0 +1,43 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: crypto-postgres
+    environment:
+      POSTGRES_DB: crypto_db
+      POSTGRES_USER: crypto_user
+      POSTGRES_PASSWORD: crypto_pass
+    ports:
+      - "5433:5432"
+    volumes:
+      - crypto-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U crypto_user -d crypto_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    image: crypto-backend
+    container_name: crypto-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+            ASPNETCORE_ENVIRONMENT: Development
+            ConnectionStrings__ConnectionString: Host=postgres;Port=5432;Database=crypto_db;Username=crypto_user;Password=crypto_pass
+            JwtConfig__Issuer: CryptoProject
+            JwtConfig__Audience: CryptoProjectUsers
+            JwtConfig__SecretKey: b/WBHZGad4c5pQ50gLZOh0Wmy7Y5gUqvVNHpYbwXgcrxR3fB/feuX9eJtM2jQ8V2f7e3rH9d8cK9Gm1yq2lY1Q==
+            JwtConfig__TokenValidityMins: 20
+            JwtConfig__RefreshTokenValidityDays: 15
+            AuthMessageSenderOptions__SendGridKey: Key
+            AuthMessageSenderOptions__FromEmail: Email_adress@gmail.com
+            AuthMessageSenderOptions__FromName: Sender_name
+            Api__BaseUrl: http://localhost:8080
+    ports:
+      - "8080:8080"
+
+volumes:
+  crypto-postgres-data:

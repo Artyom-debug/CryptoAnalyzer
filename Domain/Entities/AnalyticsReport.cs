@@ -15,6 +15,13 @@ public class AnalyticsReport : BaseEntity
     public DateTimeOffset CandleClose { get; private set; }
     public IReadOnlyList<Indicator> Indicators => _indicators.AsReadOnly();
 
+    private AnalyticsReport()
+    {
+        CoinPair = null!;
+        Probability = null!;
+        Timeframe = null!;
+    }
+
     public AnalyticsReport(Guid coinPairId,
                            Timeframe timeframe,
                            Probability probability,

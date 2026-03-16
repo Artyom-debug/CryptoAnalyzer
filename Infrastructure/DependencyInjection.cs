@@ -69,6 +69,9 @@ public static class DependencyInjection
         builder.Services.AddScoped<ApplicationDbContextInitialiser>();
 
         //configuring Identity
+        builder.Services.AddHttpContextAccessor();
+        builder.Services.AddScoped<IUser, CurrentUser>();
+
         builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
         {
             options.Password.RequiredLength = 8;

@@ -1,6 +1,7 @@
 using Application.Common.Interfaces;
 using Infrastructure;
 using Infrastructure.Auth;
+using Infrastructure.Data;
 using Infrastructure.Services.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -75,14 +76,18 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+await app.InitialiseDatabaseAsync();
+
 app.UseDefaultFiles();
 app.MapStaticAssets();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+//if (app.Environment.IsDevelopment())
+//{
+//    app.UseSwagger();
+//    app.UseSwaggerUI();
+//}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 // Configure the HTTP request pipeline.
 //if (app.Environment.IsDevelopment())
@@ -90,7 +95,7 @@ if (app.Environment.IsDevelopment())
 //    app.MapOpenApi();
 //}
 
-app.UseHttpsRedirection();
+/*app.UseHttpsRedirection();*/
 
 app.UseAuthentication();
 app.UseAuthorization();
