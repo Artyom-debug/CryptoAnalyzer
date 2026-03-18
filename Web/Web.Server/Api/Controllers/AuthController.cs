@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration.UserSecrets;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Security.Principal;
 using Web.Server.Constants;
 
@@ -62,12 +63,12 @@ public class AuthController : ControllerBase
         });
     }
 
-    [HttpPost("logout")]
     [Authorize]
+    [HttpGet("logout")]
     public async Task<IActionResult> Logout(CancellationToken token)
     {
-        var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
-        if(string.IsNullOrEmpty(userId))
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+        if (string.IsNullOrEmpty(userId))
         {
             return Unauthorized();
         }
@@ -75,6 +76,7 @@ public class AuthController : ControllerBase
         DeleteAuthCookie();
         return NoContent();
     }
+
 
     [HttpPost("confirmEmail")]
     public async Task<IActionResult> EmailConfirm([FromQuery] string userId, [FromQuery] string token)
@@ -89,11 +91,13 @@ public class AuthController : ControllerBase
 
     private void SetAuthCookie(TokenPair tokens)
     {
+        var useSecureCookie = Request.IsHttps;
+
         Response.Cookies.Append(AuthCookies.AccessToken, tokens.AccessToken!, new CookieOptions 
         {
             HttpOnly = true,
             SameSite = SameSiteMode.Strict,
-            Secure = true,
+            Secure = useSecureCookie,
             Expires = tokens.AccessTokenExpiresAt,
             Path = "/"
         });
@@ -102,7 +106,7 @@ public class AuthController : ControllerBase
         {
             HttpOnly = true,
             SameSite = SameSiteMode.Strict,
-            Secure = true,
+            Secure = useSecureCookie,
             Expires = tokens.RefreshTokenExpiresAt,
             Path = "/auth/refresh"
         });
@@ -110,10 +114,12 @@ public class AuthController : ControllerBase
 
     private void DeleteAuthCookie()
     {
+        var useSecureCookie = Request.IsHttps;
+
         Response.Cookies.Delete("access_token", new CookieOptions
         {
             HttpOnly = true,
-            Secure = true,
+            Secure = useSecureCookie,
             SameSite = SameSiteMode.Strict,
             Path = "/"
         });
@@ -121,7 +127,7 @@ public class AuthController : ControllerBase
         Response.Cookies.Delete("refresh_token", new CookieOptions
         {
             HttpOnly = true,
-            Secure = true,
+            Secure = useSecureCookie,
             SameSite = SameSiteMode.Strict,
             Path = "/auth/refresh"
         });

@@ -1,5 +1,6 @@
 ﻿using Application.Common.Dto;
 using Application.Common.Interfaces;
+using Domain.ValueObjects;
 
 namespace Application.AnaliticsReports.Queries.GetAnalyticsReportWithPagination;
 
@@ -16,9 +17,11 @@ public class GetAnalyticsReportWithPaginationQueryHandler : IRequestHandler<GetA
 
     public async Task<AnalyticsReportDto> Handle(GetAnalyticsReportWithPaginationQuery request, CancellationToken cancellationToken)
     {
+        var timeframe = new Timeframe(request.Timeframe);
+
         var entity = await _context.AnalyticsReports.AsNoTracking()
                                               .Include(a => a.CoinPair)
-                                              .Where(a => a.CoinPairId == request.CoinPairId && a.Timeframe.Value == request.Timeframe)
+                                              .Where(a => a.CoinPairId == request.CoinPairId && a.Timeframe == timeframe)
                                               .OrderByDescending(a => a.CreatedAt)
                                               .Take(10)
                                               .Skip(request.PageNumber - 1)
@@ -43,7 +46,3 @@ public class GetAnalyticsReportWithPaginationQueryHandler : IRequestHandler<GetA
         return entity;
     }
 }
-
-
-
-

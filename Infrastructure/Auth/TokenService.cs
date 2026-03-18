@@ -29,7 +29,7 @@ public class TokenService : ITokenService
 
     private async Task<(string token, DateTime expiresAt)> GenerateAccessTokenAsync(ApplicationUser user)
     {
-        var key = Encoding.UTF8.GetBytes(_jwtOptions.SecretKey);
+        var key = Convert.FromBase64String(_jwtOptions.SecretKey);
         var tokenExpireTimeStamp = DateTime.UtcNow.AddMinutes(_jwtOptions.TokenValidityMins);
         var signing = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
         var stamp = await _userManager.GetSecurityStampAsync(user);
