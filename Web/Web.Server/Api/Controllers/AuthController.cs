@@ -52,7 +52,11 @@ public class AuthController : ControllerBase
     {
         if(!Request.Cookies.TryGetValue(AuthCookies.RefreshToken, out var refreshToken) || string.IsNullOrEmpty(refreshToken))
         {
-            return Unauthorized();
+            return Problem(
+                statusCode: StatusCodes.Status401Unauthorized,
+                title: "Refresh token is missing",
+                detail: "The request does not contain a valid refresh token cookie.",
+                instance: HttpContext.Request.Path);
         }
         var response = await _mediator.Send(new RefreshCommand(refreshToken), token);
         SetAuthCookie(response);
@@ -70,7 +74,11 @@ public class AuthController : ControllerBase
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
         if (string.IsNullOrEmpty(userId))
         {
-            return Unauthorized();
+            return Problem(
+                statusCode: StatusCodes.Status401Unauthorized,
+                title: "User is not authenticated",
+                detail: "A valid access token is required to logout.",
+                instance: HttpContext.Request.Path);
         }
         await _mediator.Send(new LogoutCommand(userId), token);
         DeleteAuthCookie();
@@ -84,9 +92,16 @@ public class AuthController : ControllerBase
         var response = await _identityService.ConfirmEmailAsync(userId, token);
         if(!response.Succeeded)
         {
-            return BadRequest("Invalid emailConfirmation token.");
+            return Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Email confirmation failed",
+                detail: "The confirmation link is invalid or has expired.",
+                instance: HttpContext.Request.Path);
         }
-        return Ok("Email successfully confirmed.");
+        return Ok(new
+        {
+            message = "Email successfully confirmed."
+        });
     }
 
     private void SetAuthCookie(TokenPair tokens)

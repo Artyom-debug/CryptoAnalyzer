@@ -23,10 +23,6 @@ public class AnalyticsReportController : ControllerBase
     public async Task<ActionResult<AnalyticsReportDto>> GetReport([FromQuery] string timeframe, [FromRoute] Guid coinPairId, [FromQuery] int pageNumber)
     {
         var dto = await _mediator.Send(new GetAnalyticsReportWithPaginationQuery(timeframe, pageNumber, coinPairId));
-        if(dto == null)
-        {
-            return NotFound();
-        }
         return Ok(dto);
     }
 }

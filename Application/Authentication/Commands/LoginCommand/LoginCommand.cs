@@ -21,7 +21,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponse>
     {
         var (result, userId) = await _identity.VerifyUserPasswordAsync(command.Password, command.Email);
         if(!result.Succeeded || string.IsNullOrEmpty(userId))
-            throw new UnauthorizedAccessException("Invalid credentials.");
+            throw new UnauthorizedAccessException("Invalid email or password.");
 
         var pair = await _tokenService.GenerateTokenPairAsync(userId, cancellationToken);
 

@@ -4,18 +4,22 @@ using Infrastructure.Auth;
 using Infrastructure.Data;
 using Infrastructure.Services.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Web.Server.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add layer dependencies
 builder.AddApplicationServices();
 builder.AddInfrastructureServices();
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 
 //add jwt authentication and authorization
 const string AccessCookieName = "access_token";
@@ -77,6 +81,8 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 await app.InitialiseDatabaseAsync();
+
+app.UseExceptionHandler();
 
 app.UseDefaultFiles();
 app.MapStaticAssets();

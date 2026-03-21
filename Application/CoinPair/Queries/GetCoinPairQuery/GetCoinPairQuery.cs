@@ -1,4 +1,5 @@
 ﻿using Application.Common.Dto;
+using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 
 namespace Application.CoinPair.Queries.GetCoinPairQuery;
@@ -19,7 +20,7 @@ public class GetCoinPairQueryHandler : IRequestHandler<GetCoinPairQuery, CoinPai
         var entity = await _context.CoinPairs.Where(c => c.Symbol == request.Symbol)
                                        .Select(c => new CoinPairDto {CoinPair = request.Symbol, CoinPairId = c.Id})
                                        .FirstOrDefaultAsync(cancellationToken);
-        Guard.Against.Null(entity);
+        Guard.Against.NotFound(request.Symbol, entity);
         return entity;
     }
 }

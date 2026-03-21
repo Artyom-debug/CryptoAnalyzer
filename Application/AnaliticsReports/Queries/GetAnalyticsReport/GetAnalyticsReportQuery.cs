@@ -1,4 +1,5 @@
 ﻿using Application.Common.Dto;
+using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 
 namespace Application.AnaliticsReports.Queries.GetAnalyticsReport;
@@ -32,7 +33,8 @@ public class GetAnalyticsReportQueryHandler : IRequestHandler<GetAnalyticsReport
                                                          },
                                                          Indicators = a.Indicators.Select(i => new IndicatorDto { Importance = i.Importance, Name = i.Name, Value = i.Value }).ToList(),
                                                      }).FirstOrDefaultAsync(cancellationToken);
-        Guard.Against.Null(entity);
+        Guard.Against.NotFound(request.Id, entity);
+
         return entity;
     }
 }

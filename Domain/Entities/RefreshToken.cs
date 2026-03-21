@@ -18,7 +18,6 @@ public class RefreshToken : BaseEntity
     }
 
     public bool IsExpired(DateTime utcNow) => utcNow >= ExpiresAtUtc;
-    public bool IsActive(DateTime utcNow) => !IsRevoked && !IsExpired(utcNow);
 }
 
 

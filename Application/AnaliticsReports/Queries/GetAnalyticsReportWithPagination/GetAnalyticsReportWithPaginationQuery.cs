@@ -1,4 +1,5 @@
 ﻿using Application.Common.Dto;
+using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 using Domain.ValueObjects;
 
@@ -42,7 +43,7 @@ public class GetAnalyticsReportWithPaginationQueryHandler : IRequestHandler<GetA
                                                   Indicators = a.Indicators.Select(i => new IndicatorDto {Importance = i.Importance, Name = i.Name, Value = i.Value}).ToList(),
                                               })
                                               .FirstOrDefaultAsync(cancellationToken);
-        Guard.Against.Null(entity);
+        Guard.Against.NotFound(request.CoinPairId, entity);
         return entity;
     }
 }

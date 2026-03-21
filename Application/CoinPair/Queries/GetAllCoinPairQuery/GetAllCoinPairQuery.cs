@@ -18,6 +18,7 @@ public class GetAllCoinPairQueryHandler : IRequestHandler<GetAllCoinPairQuery, L
     public async Task<List<CoinPairDto>> Handle(GetAllCoinPairQuery request, CancellationToken cancellationToken)
     {
         var entities = await _context.CoinPairs.ToListAsync(cancellationToken);
+
         var result = entities.Select(e => new CoinPairDto { CoinPair = e.Symbol, CoinPairId = e.Id }).ToList();
         return result; 
     }

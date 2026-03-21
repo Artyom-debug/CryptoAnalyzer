@@ -35,9 +35,10 @@ public class RefreshTokenRepository : IRefreshTokenRepository
 
     public async Task RevokeAllRefreshAsync(string userId, CancellationToken ct)
     {
+        var now = DateTime.UtcNow;
         var tokens = await _context.RefreshTokens
-            .Where(r => r.UserId == userId && r.IsActive(DateTime.UtcNow))
-            .ToListAsync();
+            .Where(r => r.UserId == userId && !r.IsRevoked && r.ExpiresAtUtc > now)
+            .ToListAsync(ct);
 
         foreach(var token in tokens)
         {

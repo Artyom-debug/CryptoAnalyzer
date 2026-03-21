@@ -19,10 +19,6 @@ public class CoinPairController : ControllerBase
     public async Task<ActionResult<IEnumerable<CoinPairDto>>> GetCoinPairsAsync()
     {
         var coins = await _mediator.Send(new GetAllCoinPairQuery());
-        if(coins == null)
-        {
-            return NotFound();
-        }
         return Ok(coins);
     }
 }
