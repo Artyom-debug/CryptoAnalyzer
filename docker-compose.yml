@@ -20,6 +20,9 @@ services:
 
   backend:
     image: crypto-backend
+    build:
+      context: .
+      dockerfile: Web/Web.Server/Dockerfile
     container_name: crypto-backend
     depends_on:
       postgres:

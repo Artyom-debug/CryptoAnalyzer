@@ -21,6 +21,10 @@ builder.AddInfrastructureServices();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+
 //add jwt authentication and authorization
 const string AccessCookieName = "access_token";
 

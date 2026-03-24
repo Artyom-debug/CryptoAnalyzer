@@ -26,6 +26,7 @@ public class BackgroundCreatingReportService : IJob
     public async Task Execute(IJobExecutionContext context)
     {
         var ct = context.CancellationToken;
+        _logger.LogInformation($"Executing data from script.");
         try
         {
             var timeframe = context.MergedJobDataMap.GetString("timeframe");
