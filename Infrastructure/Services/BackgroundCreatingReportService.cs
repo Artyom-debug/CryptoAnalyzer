@@ -1,4 +1,5 @@
-﻿using Application.AnaliticsReports.Commands.CreateAnalyticsReportRange;
+﻿using Application.AnaliticsReports.Commands.CreateAnaliticsReport;
+using Application.AnaliticsReports.Commands.CreateAnalyticsReportRange;
 using Application.CoinPair.Queries.GetAllCoinPairQuery;
 using Application.Common.Dto;
 using Application.Common.Interfaces;
@@ -26,7 +27,6 @@ public class BackgroundCreatingReportService : IJob
     public async Task Execute(IJobExecutionContext context)
     {
         var ct = context.CancellationToken;
-        _logger.LogInformation($"Executing data from script.");
         try
         {
             var timeframe = context.MergedJobDataMap.GetString("timeframe");
@@ -44,33 +44,37 @@ public class BackgroundCreatingReportService : IJob
                 .Select(c => c.CoinPair!.Trim())
                 .ToArray();
 
-            var jsonReports = await _reportApiClient.GetReportJsonAsync(timeframe, coinsString!, ct);
-            List<AnalyticsReportWithCoinIdDto> reports = new(jsonReports.Count);
+            //var jsonReports = await _reportApiClient.GetReportJsonAsync(timeframe, coinsString!, ct);
+            //List<AnalyticsReportWithCoinIdDto> reports = new(jsonReports.Count);
+            var jsonReport = await _reportApiClient.GetReportAsync(ct);
 
-            foreach (var rep in jsonReports)
-            {
-                var key = rep.Symbol.Trim().ToUpperInvariant();
+            //foreach (var rep in jsonReports)
+            //{
+            //    var key = rep.Symbol.Trim().ToUpperInvariant();
 
-                if (!coinIdByName.TryGetValue(key, out var coinPairId))
-                {
-                    _logger.LogWarning("Unknown coin pair: {Symbol}", rep.Symbol);
-                    continue;
-                }
+            //    if (!coinIdByName.TryGetValue(key, out var coinPairId))
+            //    {
+            //        _logger.LogWarning("Unknown coin pair: {Symbol}", rep.Symbol);
+            //        continue;
+            //    }
 
-                reports.Add(new AnalyticsReportWithCoinIdDto
-                {
-                    Reports = rep,
-                    CoinPairId = coinPairId
-                });
-            }
+            //    reports.Add(new AnalyticsReportWithCoinIdDto
+            //    {
+            //        Reports = rep,
+            //        CoinPairId = coinPairId
+            //    });
+            //}
 
-            if (reports.Count == 0)
-            {
-                _logger.LogWarning("No reports to save for timeframe {Timeframe}", timeframe);
-                return;
-            }
+            //if (reports.Count == 0)
+            //{
+            //    _logger.LogWarning("No reports to save for timeframe {Timeframe}", timeframe);
+            //    return;
+            //}
 
-            await _mediator.Send(new CreateAnalyticsReportRangeCommand(reports), ct);
+            //await _mediator.Send(new CreateAnalyticsReportRangeCommand(reports), ct);
+            var normolizedCoinSymbol = jsonReport.Symbol.Replace('/', '-'); //delete later
+            var coinId = coinIdByName[normolizedCoinSymbol];
+            await _mediator.Send(new CreateAnalyticsReportCommand(jsonReport, coinId), ct);
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested)
         { }

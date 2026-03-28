@@ -8,6 +8,7 @@ using System.Text.Json;
 namespace Infrastructure.Services;
 
 public record Request(string Timeframe, string[] CoinPairs);
+public record PredictionHealthDto(bool Ok, bool HasCache, bool CacheFresh);
 
 public class ReportApiClient : IReportApiClient
 {
@@ -26,35 +27,71 @@ public class ReportApiClient : IReportApiClient
         _httpClient = httpClient;
     }
 
-    public async Task<IReadOnlyList<AnalyticsReportDto>> GetReportJsonAsync(string timeframe, string[] coinPairs, CancellationToken cancellationToken)
+    //public async Task<IReadOnlyList<AnalyticsReportDto>> GetReportJsonAsync(string timeframe, string[] coinPairs, CancellationToken cancellationToken)
+    //{
+    //    if (string.IsNullOrWhiteSpace(timeframe))
+    //        throw new ArgumentException("Timeframe is required.", nameof(timeframe));
+    //    if (coinPairs is null || coinPairs.Length == 0)
+    //        return new List<AnalyticsReportDto>();
+    //    var request = new Request(timeframe, coinPairs);
+    //    try
+    //    {
+    //        _logger.LogInformation("Sending request to endpoint {Endpoint}. Timeframe={Timeframe}, CoinPairs={Count}", "generateReports", timeframe, coinPairs.Length);
+    //        using var response = await _httpClient.PostAsJsonAsync("generateReports", request, jsonOptions, cancellationToken);
+    //        response.EnsureSuccessStatusCode();
+    //        var result = await response.Content.ReadFromJsonAsync<List<AnalyticsReportDto>>(jsonOptions, cancellationToken);
+    //        return result ?? new List<AnalyticsReportDto>();
+    //    }
+    //    catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+    //    {
+    //        _logger.LogWarning("Request to prediction service was cancelled.");
+    //        throw;
+    //    }
+    //    catch (JsonException ex) 
+    //    {
+    //        _logger.LogError(ex, "Invalid JSON returned by prediction service.");
+    //        return new List<AnalyticsReportDto>();
+    //    }
+    //    catch (HttpRequestException ex)
+    //    {
+    //        _logger.LogError(ex, "HTTP error while calling prediction service.");
+    //        return new List<AnalyticsReportDto>();
+    //    }
+    //}
+
+    public async Task<AnalyticsReportDto> GetReportAsync(CancellationToken cancellation)
     {
-        if (string.IsNullOrWhiteSpace(timeframe))
-            throw new ArgumentException("Timeframe is required.", nameof(timeframe));
-        if (coinPairs is null || coinPairs.Length == 0)
-            return new List<AnalyticsReportDto>();
-        var request = new Request(timeframe, coinPairs);
         try
         {
-            _logger.LogInformation("Sending request to endpoint {Endpoint}. Timeframe={Timeframe}, CoinPairs={Count}", "generateReports", timeframe, coinPairs.Length);
-            using var response = await _httpClient.PostAsJsonAsync("generateReports", request, jsonOptions, cancellationToken);
+            _logger.LogInformation("Sending request to endpoint /healthz");
+            using var response = await _httpClient.GetAsync("/healthz", cancellation);
             response.EnsureSuccessStatusCode();
-            var result = await response.Content.ReadFromJsonAsync<List<AnalyticsReportDto>>(jsonOptions, cancellationToken);
-            return result ?? new List<AnalyticsReportDto>();
+            var healthz = await response.Content.ReadFromJsonAsync<PredictionHealthDto>(jsonOptions, cancellation);
+            if (healthz is null)
+                throw new JsonException("Prediction service returned empty health response.");
+            if (!healthz.Ok)
+                throw new HttpRequestException("Prediction service health check returned Ok=false.");
+            _logger.LogInformation("Prediction service health: HasCache={HasCache}, CacheFresh={CacheFresh}", healthz.HasCache, healthz.CacheFresh);
+
+            using var reportResponse = await _httpClient.GetAsync("/prediction/latest", cancellation);
+            reportResponse.EnsureSuccessStatusCode();
+            var result = await reportResponse.Content.ReadFromJsonAsync<AnalyticsReportDto>(jsonOptions, cancellation);
+            return result ?? new AnalyticsReportDto();
         }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
         {
             _logger.LogWarning("Request to prediction service was cancelled.");
             throw;
         }
-        catch (JsonException ex) 
+        catch (JsonException ex)
         {
             _logger.LogError(ex, "Invalid JSON returned by prediction service.");
-            return new List<AnalyticsReportDto>();
+            return new AnalyticsReportDto();
         }
         catch (HttpRequestException ex)
         {
             _logger.LogError(ex, "HTTP error while calling prediction service.");
-            return new List<AnalyticsReportDto>();
+            return new AnalyticsReportDto();
         }
     }
 }

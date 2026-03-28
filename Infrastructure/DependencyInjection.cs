@@ -24,8 +24,8 @@ public static class DependencyInjection
         //configuring http client to python service
         builder.Services.AddHttpClient<IReportApiClient, ReportApiClient>((HttpClient client) =>
         {
-            client.BaseAddress = new Uri("http://localhost:3271/");
-            client.Timeout = TimeSpan.FromSeconds(10);
+            client.BaseAddress = new Uri("http://cryptobot:8000");
+            client.Timeout = TimeSpan.FromSeconds(60);
         }).AddTransientHttpErrorPolicy(policy =>
             policy.WaitAndRetryAsync(new[]
             {
@@ -48,12 +48,12 @@ public static class DependencyInjection
                 .StartNow()
                 .WithSimpleSchedule(x => x.WithIntervalInMinutes(10).RepeatForever()));
 
-            q.AddTrigger(opts => opts
-                .ForJob(jobKey)
-                .WithIdentity("GenerateReports_1hour")
-                .UsingJobData("timeframe", "1d")
-                .StartNow()
-                .WithSimpleSchedule(x => x.WithIntervalInHours(1).RepeatForever()));
+            //q.AddTrigger(opts => opts
+            //    .ForJob(jobKey)
+            //    .WithIdentity("GenerateReports_1hour")
+            //    .UsingJobData("timeframe", "1d")
+            //    .StartNow()
+            //    .WithSimpleSchedule(x => x.WithIntervalInHours(1).RepeatForever()));
         });
         builder.Services.AddQuartzHostedService(options =>
         {
